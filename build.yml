@@ -1,7 +1,7 @@
 version: 0.2
-batch:
-  fast-fail: true
 phases:
   build:
     commands:
-      - docker build -t builtimage .
+      - aws ecr get-login
+      - docker build -t=buildimage:latest .
+      - docker push buildimage:latest
