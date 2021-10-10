@@ -3,5 +3,5 @@ phases:
   build:
     commands:
       - $(aws ecr get-login --no-include-email)
-      - sudo docker build -t=buildimage:latest .
-      - sudo docker push buildimage:latest
+      - docker build -t=buildimage:latest .
+      - docker push buildimage:latest
