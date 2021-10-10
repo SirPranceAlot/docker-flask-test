@@ -2,6 +2,6 @@ version: 0.2
 phases:
   build:
     commands:
-      - aws ecr get-login
-      - docker build -t=buildimage:latest .
-      - docker push buildimage:latest
+      - $(aws ecr get-login -no-include-email)
+      - sudo docker build -t=buildimage:latest .
+      - sudo docker push buildimage:latest
