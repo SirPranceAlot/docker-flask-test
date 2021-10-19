@@ -3,5 +3,6 @@ phases:
   build:
     commands:
       - $(aws ecr get-login --no-include-email)
-      - docker build -t=buildimage:latest .
-      - docker push buildimage:latest
+      - echo $repoUri
+      - docker build -t=${repoUri}/buildimage:latest .
+      - docker push ${repoUri}/buildimage:latest
