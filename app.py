@@ -85,3 +85,4 @@ def make_response(rv):
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Access-Control-Allow-Credentials'] = 'true'
     return resp
+#
