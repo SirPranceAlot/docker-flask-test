@@ -6,3 +6,14 @@ phases:
       - echo $HELM_REPOSITORY
       - echo $HELM_CHART
       - echo $HELM_VERSION
+      - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+      - chmod 700 get_helm.sh
+      - ./get_helm.sh
+      - curl -LO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
+      - chmod x+ kubectl && mv kubectl /usr/local/bin/
+      - echo "check if helm is installed"
+      - helm
+      - helm --version
+      - echo "check kubectl"
+      - kubectl
+      - kubectl --version
