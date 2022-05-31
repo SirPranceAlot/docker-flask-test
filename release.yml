@@ -2,18 +2,21 @@ version: 0.2
 phases:
   build:
     commands:
+      - yum install jq
       - echo $HELM_NAMESPACE
       - echo $HELM_REPOSITORY
       - echo $HELM_CHART
       - echo $HELM_VERSION
+      - echo $EKS_PIPELINE_NAME
       - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
       - chmod 700 get_helm.sh
       - ./get_helm.sh
       - curl -LO https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
-      - chmod x+ kubectl && mv kubectl /usr/local/bin/
-      - echo "check if helm is installed"
-      - helm
-      - helm --version
-      - echo "check kubectl"
-      - kubectl
-      - kubectl --version
+      - chmod +x kubectl && mv kubectl /usr/local/bin/
+      - K8_ROLE_ARN=$(aws cloudformation describe-stacks --region $STAGE_REGION --stack-name $EKS_PIPELINE_NAME | jq -r '.[][0]["Outputs"][0]| select(.ExportName="clusterROleArn")["OutputValue"]')
+      - echo $K8_ROLE_ARN
+      - OUT=$(aws sts assume-role --role-arn $K8_ROLE_ARN --role-session-name $STAGE_NAME)
+      - export AWS_ACCESS_KEY_ID=$(echo $OUT | jq -r '.["Credentials"]["AccessKeyId"]')
+      - export AWS_SECRET_ACCESS_KEY=$(echo $OUT | jq -r '.["Credentials"]["SecretAccessKey"]')
+      - export AWS_SESSION_TOKEN=$(echo $OUT | jq -r '.["Credentials"]["SessionToken"]')
+      - kubectl get pods
