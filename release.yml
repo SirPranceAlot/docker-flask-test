@@ -2,7 +2,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - $(aws ecr get-login --no-include-email)
-      - echo $repoUri
-      - docker build -t=${repoUri}:latest .
-      - docker push ${repoUri}:latest
+      - echo $HELM_NAMESPACE
+      - echo $HELM_REPOSITORY
+      - echo $HELM_CHART
+      - echo $HELM_VERSION
