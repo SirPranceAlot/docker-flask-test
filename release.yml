@@ -11,6 +11,7 @@ phases:
       - mv /tmp/eksctl /usr/local/bin
       - chmod +x kubectl && mv kubectl /usr/local/bin/
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $STAGE_REGION --role-arn $EKS_ROLE_ARN
+      - eksctl utils associate-iam-oidc-provider --cluster "$EKS_CLUSTER_NAME" --approve
       - eksctl create iamserviceaccount --cluster="$EKS_CLUSTER_NAME"  --namespace=kube-system --name=aws-load-balancer-controller --role-name "AmazonEKSLoadBalancerControllerRole" --attach-policy-arn="$LB_POLICY_ARN" --approve
       - helm upgrade --install $HELM_CHART $HELM_REPOSITORY$HELM_CHART-$HELM_VERSION.tgz
       - kubectl get pods
