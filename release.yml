@@ -10,6 +10,8 @@ phases:
       - curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
       - mv /tmp/eksctl /usr/local/bin
       - chmod +x kubectl && mv kubectl /usr/local/bin/
+      - touch ~/.aws/config && echo "[profile eksRole]\ncredential_source = Ec2InstanceMetadata\nrole_arn = $EKS_ROLE_ARN" > ~/.aws/config
+      - export AWS_PROFILE=eksRole
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $STAGE_REGION --role-arn $EKS_ROLE_ARN
       - aws sts get-caller-identity
       - eksctl utils associate-iam-oidc-provider --cluster "$EKS_CLUSTER_NAME" --approve
