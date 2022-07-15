@@ -14,8 +14,6 @@ phases:
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $STAGE_REGION --role-arn $EKS_ROLE_ARN
       - aws sts get-caller-identity
       - eksctl utils associate-iam-oidc-provider --cluster "$EKS_CLUSTER_NAME" --approve
-      - eksctl delete iamserviceaccount --cluster="$EKS_CLUSTER_NAME"  --namespace=kube-system --name=lb-contrl
-      - sleep 10
       - eksctl create iamserviceaccount --cluster="$EKS_CLUSTER_NAME"  --namespace=kube-system --name=lb-contrl --role-name "AmazonEKSLoadBalancerControllerRole" --attach-policy-arn="$LB_POLICY_ARN" --approve --override-existing-serviceaccounts
       - helm repo add eks https://aws.github.io/eks-charts
       - helm repo update
