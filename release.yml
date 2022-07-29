@@ -2,16 +2,33 @@ version: 0.2
 phases:
   build:
     commands:
-        - echo $BUILD_IMAGE 
-        - export ECR_REPO=$(echo $BUILD_IMAGE | cut -d'/' -f 1)
-        - aws ecr get-login-password --region $STAGE_REGION | docker login --username AWS --password-stdin $ECR_REPO
-        - docker run -t -e EKS_ROLE_ARN=$EKS_ROLE_ARN $BUILD_IMAGE:$BUILD_IMAGE_TAG
+      - echo $BUILD_IMAGE
+      - export ECR_REPO=$(echo $BUILD_IMAGE | cut -d'/' -f 1)
+      - docker login -u AWS -p $(aws ecr get-login-password --region $STAGE_REGION) $ECR_REPO
+      - docker pull $BUILD_IMAGE:$BUILD_IMAGE_TAG
+      - export EKS_ROLE=$(aws sts assume-role --role-arn $EKS_ROLE_ARN --role-session-name eksRole)
+      - export AWS_ACCESS_KEY_ID=$(echo "${EKS_ROLE}" | jq -r '.Credentials.AccessKeyId')
+      - export AWS_SECRET_ACCESS_KEY=$(echo "${EKS_ROLE}" | jq -r '.Credentials.SecretAccessKey')
+      - export AWS_SESSION_TOKEN=$(echo "${EKS_ROLE}" | jq -r '.Credentials.SessionToken')
+      - |
+        docker run -t \
+        -e EKS_ROLE_ARN=$EKS_ROLE_ARN \
+        -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+        -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+        -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+        -e STAGE_REGION=$STAGE_REGION \
+        -e LB_POLICY_ARN=$LB_POLICY_ARN \
+        -e EKS_CLUSTER_NAME=$EKS_CLUSTER_NAME \
+        -e HELM_CHART=$HELM_CHART \
+        -e HELM_REPOSITORY=$HELM_REPOSITORY \
+        -e HELM_VERSION=$HELM_VERSION \
+        $BUILD_IMAGE:$BUILD_IMAGE_TAG
       # - curl https://helm-charts-tinystacks.s3.us-west-1.amazonaws.com/helm3.sh | bash -s -- --version v3.8.2
       # - curl -LO https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl
       # - curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
       # - mv /tmp/eksctl /usr/local/bin
       # - chmod +x kubectl && mv kubectl /usr/local/bin/
-      # - export EKS_ROLE=$(aws sts assume-role --role-arn $EKS_ROLE_ARN --role-session-name eksRole) 
+      # - export EKS_ROLE=$(aws sts assume-role --role-arn $EKS_ROLE_ARN --role-session-name eksRole)
       # - export AWS_ACCESS_KEY_ID=$(echo "${EKS_ROLE}" | jq -r '.Credentials.AccessKeyId')
       # - export AWS_SECRET_ACCESS_KEY=$(echo "${EKS_ROLE}" | jq -r '.Credentials.SecretAccessKey')
       # - export AWS_SESSION_TOKEN=$(echo "${EKS_ROLE}" | jq -r '.Credentials.SessionToken')
