@@ -2,21 +2,22 @@ version: 0.2
 phases:
   build:
     commands:
-      - curl https://helm-charts-tinystacks.s3.us-west-1.amazonaws.com/helm3.sh | bash -s -- --version v3.8.2
-      - curl -LO https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl
-      - curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-      - mv /tmp/eksctl /usr/local/bin
-      - chmod +x kubectl && mv kubectl /usr/local/bin/
-      - export EKS_ROLE=$(aws sts assume-role --role-arn $EKS_ROLE_ARN --role-session-name eksRole) 
-      - export AWS_ACCESS_KEY_ID=$(echo "${EKS_ROLE}" | jq -r '.Credentials.AccessKeyId')
-      - export AWS_SECRET_ACCESS_KEY=$(echo "${EKS_ROLE}" | jq -r '.Credentials.SecretAccessKey')
-      - export AWS_SESSION_TOKEN=$(echo "${EKS_ROLE}" | jq -r '.Credentials.SessionToken')
-      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $STAGE_REGION --role-arn $EKS_ROLE_ARN
-      - aws sts get-caller-identity
-      - eksctl utils associate-iam-oidc-provider --cluster "$EKS_CLUSTER_NAME" --approve
-      - eksctl create iamserviceaccount --cluster="$EKS_CLUSTER_NAME"  --namespace=kube-system --name=lb-contrl --role-name "AmazonEKSLoadBalancerControllerRole" --attach-policy-arn="$LB_POLICY_ARN" --approve --override-existing-serviceaccounts
-      - helm repo add eks https://aws.github.io/eks-charts
-      - helm repo update
-      - helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=$EKS_CLUSTER_NAME --set serviceAccount.create=false --set serviceAccount.name=lb-contrl --set "serviceAccount.name=lb-contrl"
-      - helm upgrade --install $HELM_CHART $HELM_REPOSITORY$HELM_CHART-$HELM_VERSION.tgz
-      - kubectl get pods
+        - docker run -t -e EKS_ROLE_ARN=$EKS_ROLE_ARN $BUILD_IMAGE 
+      # - curl https://helm-charts-tinystacks.s3.us-west-1.amazonaws.com/helm3.sh | bash -s -- --version v3.8.2
+      # - curl -LO https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl
+      # - curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+      # - mv /tmp/eksctl /usr/local/bin
+      # - chmod +x kubectl && mv kubectl /usr/local/bin/
+      # - export EKS_ROLE=$(aws sts assume-role --role-arn $EKS_ROLE_ARN --role-session-name eksRole) 
+      # - export AWS_ACCESS_KEY_ID=$(echo "${EKS_ROLE}" | jq -r '.Credentials.AccessKeyId')
+      # - export AWS_SECRET_ACCESS_KEY=$(echo "${EKS_ROLE}" | jq -r '.Credentials.SecretAccessKey')
+      # - export AWS_SESSION_TOKEN=$(echo "${EKS_ROLE}" | jq -r '.Credentials.SessionToken')
+      # - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $STAGE_REGION --role-arn $EKS_ROLE_ARN
+      # - aws sts get-caller-identity
+      # - eksctl utils associate-iam-oidc-provider --cluster "$EKS_CLUSTER_NAME" --approve
+      # - eksctl create iamserviceaccount --cluster="$EKS_CLUSTER_NAME"  --namespace=kube-system --name=lb-contrl --role-name "AmazonEKSLoadBalancerControllerRole" --attach-policy-arn="$LB_POLICY_ARN" --approve --override-existing-serviceaccounts
+      # - helm repo add eks https://aws.github.io/eks-charts
+      # - helm repo update
+      # - helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=$EKS_CLUSTER_NAME --set serviceAccount.create=false --set serviceAccount.name=lb-contrl --set "serviceAccount.name=lb-contrl"
+      # - helm upgrade --install $HELM_CHART $HELM_REPOSITORY$HELM_CHART-$HELM_VERSION.tgz
+      # - kubectl get pods
